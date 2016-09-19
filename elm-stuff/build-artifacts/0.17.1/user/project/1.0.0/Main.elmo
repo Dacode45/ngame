@@ -1,0 +1,71 @@
+var _user$project$Main$view = function (objs) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(
+			_elm_lang$core$List$map,
+			_elm_lang$html$Html$text,
+			A2(_elm_lang$core$List$map, _elm_lang$core$Basics$toString, objs)));
+};
+var _user$project$Main$updateVector = F3(
+	function (dt, v1, v2) {
+		return _elm_lang$core$Native_Utils.update(
+			v1,
+			{x: v1.x + (v2.x * dt), y: v2.y + (v2.y * dt)});
+	});
+var _user$project$Main$applyPhysics = F2(
+	function (dt, obj) {
+		return obj.$static ? obj : _elm_lang$core$Native_Utils.update(
+			obj,
+			{
+				position: A3(_user$project$Main$updateVector, dt, obj.position, obj.velocity),
+				velocity: A3(
+					_elm_lang$core$List$foldr,
+					_user$project$Main$updateVector(dt),
+					obj.velocity,
+					obj.forces),
+				forces: _elm_lang$core$Native_List.fromArray(
+					[]),
+				$static: obj.$static
+			});
+	});
+var _user$project$Main$addVector = F2(
+	function (v1, v2) {
+		return _elm_lang$core$Native_Utils.update(
+			v1,
+			{x: v1.x + v2.x, y: v1.y + v2.y});
+	});
+var _user$project$Main$gravity = {x: 0, y: -10};
+var _user$project$Main$Vector = F2(
+	function (a, b) {
+		return {x: a, y: b};
+	});
+var _user$project$Main$GObject = F5(
+	function (a, b, c, d, e) {
+		return {position: a, velocity: b, forces: c, isFloating: d, $static: e};
+	});
+var _user$project$Main$KeyRight = function (a) {
+	return {ctor: 'KeyRight', _0: a};
+};
+var _user$project$Main$KeyLeft = function (a) {
+	return {ctor: 'KeyLeft', _0: a};
+};
+var _user$project$Main$KeyUp = function (a) {
+	return {ctor: 'KeyUp', _0: a};
+};
+var _user$project$Main$KeyDown = function (a) {
+	return {ctor: 'KeyDown', _0: a};
+};
+var _user$project$Main$TimeUpdate = function (a) {
+	return {ctor: 'TimeUpdate', _0: a};
+};
+var _user$project$Main$subscriptions = function (obj) {
+	return _elm_lang$core$Platform_Sub$batch(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$animation_frame$AnimationFrame$diffs(_user$project$Main$TimeUpdate),
+				_elm_lang$keyboard$Keyboard$downs(_user$project$Main$KeyDown),
+				_elm_lang$keyboard$Keyboard$ups(_user$project$Main$KeyUp)
+			]));
+};
