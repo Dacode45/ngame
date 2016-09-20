@@ -1,121 +1,140 @@
 module Main exposing (..)
 
-import List
-import Keyboard
-import Html exposing (..)
-import Html.App
-import Time exposing (Time)
-import AnimationFrame
+import Html exposing (Html)
+import Html.App as Html
 
+import Svg.Events exposing (onClick)
+import Svg.Attributes as Attributes exposing (x,y,width,height,fill,fontFamily,textAnchor)
 
-type alias Vector =
-    { x : Float
-    , y : Float
-    }
+main : Program Never
+main =
+  Html.program
+  {
+    init = init
+    update = update
+    view = view
+    subscriptions = subscriptions
+  }
 
+type alias Game :
+  {
+      scene : Scene
+  }
 
-gravity : Vector
-gravity =
-    { x = 0
-    , y = -10
-    }
+type alias Scene :
+  {
+    tiles : Array Int
+    ,tileWidth : Float
+    ,tileHeight : Float
+    ,sceneWidght : Int
+    ,sceneHeight : Int
+  }
 
+type alias Tile :
+  {
+    tileType : Int
+    x : Float
+    y : Float
+    w : Float
+    h : Float
+  }
 
-type alias GObject =
-    { position : Vector
-    , velocity : Vector
-    , forces : List Vector
-    , isFloating : Bool
-    , static : Bool
-    }
+tileAt : Scene -> Int -> Int -> Tile
+tileAt scene index _
+  let
+    i = index % sceneWidth
+    j = index // sceneWidth
+    x = i * scene.tileWidth
+    y = j * scene.tileHeight
+  in
+  {
+    tileType = Array.get index scene.tiles
+    , x = x
+    , y = y
+    , w = scene.tileWidth
+    , h = scene.tileHeight
+  }
 
+tiles : Scene -> Array Tile
+tiles scene =
+  Array.indexedMap (tileAt scene) scene.tiles
 
-type alias Model =
-    { objs : List GObject
-    }
+windowSize : Scene -> (Float, Float)
+windowSize scene =
+  (scene.tileWidth * scene.sceneWidth, scene.tileHeight * scene.sceneHeight)
 
-
-model : Model
-model =
-    { objs = []
-    }
-
-
-addVector : Vector -> Vector -> Vector
-addVector v1 v2 =
-    { v1
-        | x = v1.x + v2.x
-        , y = v1.y + v2.y
-    }
-
-
-updateVector : Time -> Vector -> Vector -> Vector
-updateVector dt v1 v2 =
-    { v1
-        | x = v1.x + (v2.x * dt)
-        , y = v2.y + (v2.y * dt)
-    }
-
-
-applyPhysics : Time -> GObject -> GObject
-applyPhysics dt obj =
-    if obj.static then
-        obj
-    else
-        { obj
-            | position = updateVector dt obj.position obj.velocity
-            , velocity = List.foldr (updateVector dt) obj.velocity obj.forces
-            , forces = []
-            , static = obj.static
-        }
-
+-- Subscriptions
 
 type Msg
-    = TimeUpdate Time
-    | KeyDown Keyboard.KeyCode
-    | KeyUp Keyboard.KeyCode
+ = ResizeWindow (Int, Int)
+  | Tick Time
+  | KeyChange Bool KeyCode
+  | StartGame
+  | TimeSecond Time
+  | NoOp
 
+subscriptions : Game -> Sub Msg
+subscriptions game =
+  let
+    window = Window.resizes (\{width,height} -> ResizeWindow (width,height))
+    keys = [ Keyboard.downs (KeyChange True)
+           , Keyboard.ups (KeyChange False)
+             ]
+    animation = [ AnimationFrame.diffs Tick ]
+  in
+    ( window ++ keys ++ animation ) |> Sub.batch
 
-main =
-    Html.App.program
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
+initialWindowSizeCommand : Cmd Msg
+initialWindowSizeCommand =
+  Task.perform (\_ -> NoOp) (\{width,height} -> ResizeWindow (width,height)) Window.size
+-- View --
+view : Game -> Html Msg
+view game =
+  renderScene game.scene
 
+renderScene : Scene -> Html.Html Msg
+renderscene scene =
+  Svg.svg(svgAttributes ( windowSize scene))
+  [
+    renderMap scene
+  ]
 
-init : ( Model, Cmd Msg )
-init =
-    ( model, Cmd.none )
+tileColor : Int -> String
+tileColor tileType =
+  case tileType of
+    1 -> "rgba(255, 0, 0, 1)"
+    _ -> "rgba(255, 255, 255, 0)"
 
+renderTile : Tile -> Svg Msg
+renderTile tile
+let
+  xString = toString tile.x
+  yString = toString tile.y
+  widthString = toString tile.w
+  heightString = toString tile.h
+in
+  Svg.rect
+  [
+    x xString
+    ,y yString
+    , width  widthString
+    , height heightString
+    , fill tileColor tile
+  ]
 
-view : Model -> Html msg
-view model =
-    div [] (model.objs |> List.map toString |> List.map text)
+renderMap : Scene -> Svg Msg
+renderMap scene =
+  scene
+    |> tiles
+    |> Array.map renderTile
+    |> toList
 
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    ( model, Cmd.none )
-
-
-
--- case msg of =
---   TimeUpdate dt ->
---     ( { model |
---         objs = List.map (applyPhysics dt) model.objs
---       }, Cmd.none )
---   KeyDown keyCode ->
---     ( model, Cmd.none )
---   KeyUp keyCode ->
---     ( model, Cmd.none )
-
-
-subscriptions : GObject -> Sub Msg
-subscriptions obj =
-    Sub.batch
-        [ AnimationFrame.diffs TimeUpdate
-        , Keyboard.downs KeyDown
-        , Keyboard.ups KeyUp
-        ]
+svgAttributes : (Int, Int) -> List (Attribute Msg)
+svgAttributes (w, h) =
+  [ width (toString w)
+  , height (toString h)
+  , Attributes.viewBox <| "0 0 " ++ (toString w) ++ " " ++ (toString h)
+  , VirtualDom.property "xmlns:xlink" (Json.string "http://www.w3.org/1999/xlink")
+  , Attributes.version "1.1"
+  , Attributes.style "position: fixed;"
+  ]
