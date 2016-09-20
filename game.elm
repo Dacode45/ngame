@@ -2,7 +2,12 @@ module Main exposing (..)
 
 import Html exposing (Html)
 import Html.App as Html
-
+import Array exposing (Array)
+import Time exposing (Time)
+import Window
+import Scenes exposing (..)
+import AnimationFrame
+import Keyboard exposing (KeyCode )
 import Svg.Events exposing (onClick)
 import Svg.Attributes as Attributes exposing (x,y,width,height,fill,fontFamily,textAnchor)
 
@@ -11,57 +16,23 @@ main =
   Html.program
   {
     init = init
-    update = update
-    view = view
-    subscriptions = subscriptions
+    ,update = update
+    ,view = view
+    ,subscriptions = subscriptions
   }
 
-type alias Game :
+type alias Game =
   {
       scene : Scene
   }
 
-type alias Scene :
-  {
-    tiles : Array Int
-    ,tileWidth : Float
-    ,tileHeight : Float
-    ,sceneWidght : Int
-    ,sceneHeight : Int
-  }
+-- Initialization
 
-type alias Tile :
-  {
-    tileType : Int
-    x : Float
-    y : Float
-    w : Float
-    h : Float
-  }
-
-tileAt : Scene -> Int -> Int -> Tile
-tileAt scene index _
-  let
-    i = index % sceneWidth
-    j = index // sceneWidth
-    x = i * scene.tileWidth
-    y = j * scene.tileHeight
-  in
-  {
-    tileType = Array.get index scene.tiles
-    , x = x
-    , y = y
-    , w = scene.tileWidth
-    , h = scene.tileHeight
-  }
-
-tiles : Scene -> Array Tile
-tiles scene =
-  Array.indexedMap (tileAt scene) scene.tiles
-
-windowSize : Scene -> (Float, Float)
-windowSize scene =
-  (scene.tileWidth * scene.sceneWidth, scene.tileHeight * scene.sceneHeight)
+init : Game
+init =
+  case getScene "test" of
+    Nothing -> { scene = genTestScene }
+    Just scene -> { scene = scene }
 
 -- Subscriptions
 
@@ -93,11 +64,9 @@ view game =
   renderScene game.scene
 
 renderScene : Scene -> Html.Html Msg
-renderscene scene =
-  Svg.svg(svgAttributes ( windowSize scene))
-  [
-    renderMap scene
-  ]
+renderScene scene =
+  Svg.svg(svgAttributes ( windowSize scene)) (renderMap scene)
+
 
 tileColor : Int -> String
 tileColor tileType =
@@ -106,21 +75,21 @@ tileColor tileType =
     _ -> "rgba(255, 255, 255, 0)"
 
 renderTile : Tile -> Svg Msg
-renderTile tile
-let
-  xString = toString tile.x
-  yString = toString tile.y
-  widthString = toString tile.w
-  heightString = toString tile.h
-in
-  Svg.rect
-  [
-    x xString
-    ,y yString
-    , width  widthString
-    , height heightString
-    , fill tileColor tile
-  ]
+renderTile tile =
+  let
+    xString = toString tile.x
+    yString = toString tile.y
+    widthString = toString tile.w
+    heightString = toString tile.h
+  in
+    Svg.rect
+    [
+      x xString
+      ,y yString
+      , width  widthString
+      , height heightString
+      , fill tileColor tile
+    ]
 
 renderMap : Scene -> Svg Msg
 renderMap scene =
