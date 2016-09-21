@@ -1,175 +1,188 @@
-var _user$project$Main$view = function (game) {
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		_elm_lang$core$Native_List.fromArray(
-			[
+var _user$project$Main$svgAttributes = function (_p0) {
+	var _p1 = _p0;
+	var _p3 = _p1._0;
+	var _p2 = _p1._1;
+	return _elm_lang$core$Native_List.fromArray(
+		[
+			_elm_lang$svg$Svg_Attributes$width(
+			_elm_lang$core$Basics$toString(_p3)),
+			_elm_lang$svg$Svg_Attributes$height(
+			_elm_lang$core$Basics$toString(_p2)),
+			_elm_lang$svg$Svg_Attributes$viewBox(
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'0 0 ',
 				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				A2(
-					_elm_lang$core$List$map,
-					_elm_lang$html$Html$text,
-					A2(_elm_lang$core$List$map, _elm_lang$core$Basics$toString, game.objs))),
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(game.player))
-					])),
-				_elm_lang$html$Html$text('Hello, World!')
-			]));
+					_elm_lang$core$Basics_ops['++'],
+					_elm_lang$core$Basics$toString(_p3),
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						' ',
+						_elm_lang$core$Basics$toString(_p2))))),
+			A2(
+			_elm_lang$virtual_dom$VirtualDom$property,
+			'xmlns:xlink',
+			_elm_lang$core$Json_Encode$string('http://www.w3.org/1999/xlink')),
+			_elm_lang$svg$Svg_Attributes$version('1.1'),
+			_elm_lang$svg$Svg_Attributes$style('position: fixed;')
+		]);
 };
-var _user$project$Main$setForce = F3(
-	function (name, force, obj) {
-		return _elm_lang$core$Native_Utils.update(
-			obj,
-			{
-				forces: A3(_elm_lang$core$Dict$insert, name, force, obj.forces)
-			});
-	});
-var _user$project$Main$gravity = {x: 0, y: -10};
-var _user$project$Main$defaultPhysics = function (gTag) {
-	var _p0 = gTag;
-	if (_p0 === 'player') {
-		return _elm_lang$core$Dict$fromList(
-			_elm_lang$core$Native_List.fromArray(
-				[
-					{ctor: '_Tuple2', _0: 'gravity', _1: _user$project$Main$gravity}
-				]));
+var _user$project$Main$tileColor = function (tileType) {
+	var _p4 = tileType;
+	if (_p4 === 1) {
+		return 'rgba(255, 0, 0, 1)';
 	} else {
-		return _elm_lang$core$Dict$fromList(
-			_elm_lang$core$Native_List.fromArray(
-				[]));
+		return 'rgba(255, 255, 255, 0)';
 	}
 };
-var _user$project$Main$updateVector = F3(
-	function (dt, v1, v2) {
-		return _elm_lang$core$Native_Utils.update(
-			v1,
-			{x: v1.x + (v2.x * dt), y: v2.y + (v2.y * dt)});
+var _user$project$Main$renderTile = function (tile) {
+	var heightString = _elm_lang$core$Basics$toString(tile.h);
+	var widthString = _elm_lang$core$Basics$toString(tile.w);
+	var yString = _elm_lang$core$Basics$toString(tile.y);
+	var xString = _elm_lang$core$Basics$toString(tile.x);
+	return A2(
+		_elm_lang$svg$Svg$rect,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$svg$Svg_Attributes$x(xString),
+				_elm_lang$svg$Svg_Attributes$y(yString),
+				_elm_lang$svg$Svg_Attributes$width(widthString),
+				_elm_lang$svg$Svg_Attributes$height(heightString),
+				_elm_lang$svg$Svg_Attributes$fill(
+				_user$project$Main$tileColor(tile.tileType))
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[]));
+};
+var _user$project$Main$renderMap = function (scene) {
+	var t = 1;
+	return _elm_lang$core$Array$toList(
+		A2(
+			_elm_lang$core$Array$map,
+			_user$project$Main$renderTile,
+			_user$project$Scenes$tiles(scene)));
+};
+var _user$project$Main$renderScene = function (scene) {
+	return _user$project$Main$renderMap(scene);
+};
+var _user$project$Main$renderPlayer = F2(
+	function (scene, player) {
+		var msg = A2(
+			_elm_lang$core$Debug$log,
+			_elm_lang$core$Basics$toString(player),
+			1);
+		var heightString = _elm_lang$core$Basics$toString(scene.tileHeight);
+		var widthString = _elm_lang$core$Basics$toString((scene.tileWidth / 2) | 0);
+		var yString = _elm_lang$core$Basics$toString(player.position.y);
+		var xString = _elm_lang$core$Basics$toString(player.position.x);
+		return A2(
+			_elm_lang$svg$Svg$rect,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$svg$Svg_Attributes$x(xString),
+					_elm_lang$svg$Svg_Attributes$y(yString),
+					_elm_lang$svg$Svg_Attributes$width(widthString),
+					_elm_lang$svg$Svg_Attributes$height(heightString),
+					_elm_lang$svg$Svg_Attributes$fill('rgba(0,0,255,1)')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[]));
 	});
-var _user$project$Main$applyPhysics = F2(
-	function (dt, obj) {
-		return obj.$static ? obj : _elm_lang$core$Native_Utils.update(
-			obj,
-			{
-				position: A3(_user$project$Main$updateVector, dt, obj.position, obj.velocity),
-				velocity: A3(
-					_elm_lang$core$List$foldr,
-					_user$project$Main$updateVector(dt),
-					obj.velocity,
-					_elm_lang$core$Dict$values(obj.forces)),
-				forces: _user$project$Main$defaultPhysics(obj.gTag)
-			});
-	});
-var _user$project$Main$addVector = F2(
-	function (v1, v2) {
-		return _elm_lang$core$Native_Utils.update(
-			v1,
-			{x: v1.x + v2.x, y: v1.y + v2.y});
+var _user$project$Main$view = function (game) {
+	return A2(
+		_elm_lang$svg$Svg$svg,
+		_user$project$Main$svgAttributes(
+			_user$project$Scenes$windowSize(game.scene)),
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_user$project$Main$renderScene(game.scene),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(_user$project$Main$renderPlayer, game.scene, game.player)
+				])));
+};
+var _user$project$Main$update = F2(
+	function (action, game) {
+		return {ctor: '_Tuple2', _0: game, _1: _elm_lang$core$Platform_Cmd$none};
 	});
 var _user$project$Main$Vector = F2(
 	function (a, b) {
 		return {x: a, y: b};
 	});
-var _user$project$Main$ninja = {
-	position: A2(_user$project$Main$Vector, 0, 0),
-	velocity: A2(_user$project$Main$Vector, 0, 0),
-	forces: _user$project$Main$defaultPhysics('player'),
-	isFloating: true,
-	$static: false,
-	gTag: 'player'
-};
-var _user$project$Main$game = {
-	objs: _elm_lang$core$Native_List.fromArray(
-		[]),
-	player: _user$project$Main$ninja
-};
-var _user$project$Main$init = {ctor: '_Tuple2', _0: _user$project$Main$game, _1: _elm_lang$core$Platform_Cmd$none};
-var _user$project$Main$keyDown = F2(
-	function (keyCode, game) {
-		var one = A2(_elm_lang$core$Debug$log, 'one', keyCode);
-		var player = game.player;
-		var _p1 = _user$project$Key$fromCode(keyCode);
-		if (_p1.ctor === 'Space') {
-			return _elm_lang$core$Native_Utils.update(
-				game,
-				{
-					player: A3(
-						_user$project$Main$setForce,
-						'jump',
-						A2(_user$project$Main$Vector, 0, 10),
-						player)
-				});
-		} else {
-			return game;
-		}
-	});
-var _user$project$Main$update = F2(
-	function (msg, game) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
-			case 'TimeUpdate':
-				var _p3 = _p2._0;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						game,
-						{
-							objs: A2(
-								_elm_lang$core$List$map,
-								_user$project$Main$applyPhysics(_p3),
-								game.objs),
-							player: A2(_user$project$Main$applyPhysics, _p3, game.player)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'KeyDown':
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$Main$keyDown, _p2._0, game),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				return {ctor: '_Tuple2', _0: game, _1: _elm_lang$core$Platform_Cmd$none};
-		}
-	});
-var _user$project$Main$GObject = F6(
-	function (a, b, c, d, e, f) {
-		return {position: a, velocity: b, forces: c, isFloating: d, $static: e, gTag: f};
-	});
-var _user$project$Main$Player = function (a) {
-	return {obj: a};
-};
 var _user$project$Main$Game = F2(
 	function (a, b) {
-		return {objs: a, player: b};
+		return {scene: a, player: b};
 	});
-var _user$project$Main$KeyUp = function (a) {
-	return {ctor: 'KeyUp', _0: a};
+var _user$project$Main$GameObject = function (a) {
+	return {position: a};
 };
-var _user$project$Main$KeyDown = function (a) {
-	return {ctor: 'KeyDown', _0: a};
+var _user$project$Main$init = function () {
+	var initialScene = A2(
+		_elm_lang$core$Maybe$withDefault,
+		_user$project$Scenes$genTestScene,
+		_user$project$Scenes$getScene('test'));
+	return {
+		ctor: '_Tuple2',
+		_0: {
+			scene: initialScene,
+			player: _user$project$Main$GameObject(
+				_user$project$Scenes$getPlayerSpawnPos(initialScene))
+		},
+		_1: _elm_lang$core$Platform_Cmd$none
+	};
+}();
+var _user$project$Main$NoOp = {ctor: 'NoOp'};
+var _user$project$Main$TimeSecond = function (a) {
+	return {ctor: 'TimeSecond', _0: a};
 };
-var _user$project$Main$TimeUpdate = function (a) {
-	return {ctor: 'TimeUpdate', _0: a};
+var _user$project$Main$StartGame = {ctor: 'StartGame'};
+var _user$project$Main$KeyChange = F2(
+	function (a, b) {
+		return {ctor: 'KeyChange', _0: a, _1: b};
+	});
+var _user$project$Main$Tick = function (a) {
+	return {ctor: 'Tick', _0: a};
 };
-var _user$project$Main$subscriptions = function (obj) {
+var _user$project$Main$ResizeWindow = function (a) {
+	return {ctor: 'ResizeWindow', _0: a};
+};
+var _user$project$Main$subscriptions = function (game) {
+	var animation = _elm_lang$core$Native_List.fromArray(
+		[
+			_elm_lang$animation_frame$AnimationFrame$diffs(_user$project$Main$Tick)
+		]);
+	var keys = _elm_lang$core$Native_List.fromArray(
+		[
+			_elm_lang$keyboard$Keyboard$downs(
+			_user$project$Main$KeyChange(true)),
+			_elm_lang$keyboard$Keyboard$ups(
+			_user$project$Main$KeyChange(false))
+		]);
+	var window = _elm_lang$window$Window$resizes(
+		function (_p5) {
+			var _p6 = _p5;
+			return _user$project$Main$ResizeWindow(
+				{ctor: '_Tuple2', _0: _p6.width, _1: _p6.height});
+		});
 	return _elm_lang$core$Platform_Sub$batch(
-		_elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$animation_frame$AnimationFrame$diffs(_user$project$Main$TimeUpdate),
-				_elm_lang$keyboard$Keyboard$downs(_user$project$Main$KeyDown),
-				_elm_lang$keyboard$Keyboard$ups(_user$project$Main$KeyUp)
-			]));
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_elm_lang$core$Native_List.fromArray(
+				[window]),
+			A2(_elm_lang$core$Basics_ops['++'], keys, animation)));
 };
 var _user$project$Main$main = {
 	main: _elm_lang$html$Html_App$program(
-		{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})
+		{init: _user$project$Main$init, update: _user$project$Main$update, view: _user$project$Main$view, subscriptions: _user$project$Main$subscriptions})
 };
+var _user$project$Main$initialWindowSizeCommand = A3(
+	_elm_lang$core$Task$perform,
+	function (_p7) {
+		return _user$project$Main$NoOp;
+	},
+	function (_p8) {
+		var _p9 = _p8;
+		return _user$project$Main$ResizeWindow(
+			{ctor: '_Tuple2', _0: _p9.width, _1: _p9.height});
+	},
+	_elm_lang$window$Window$size);
