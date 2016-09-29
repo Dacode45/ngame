@@ -1,24 +1,136 @@
-var _user$project$Main$svgAttributes = function (_p0) {
-	var _p1 = _p0;
-	var _p3 = _p1._0;
-	var _p2 = _p1._1;
+var _user$project$Main$buildTileMapTiles = F3(
+	function (mapWidth, mapHeight, check) {
+		var bachedChecks = function (index) {
+			var y = (index / mapWidth) | 0;
+			var x = A2(_elm_lang$core$Basics_ops['%'], index, mapWidth);
+			return A2(check, x, y);
+		};
+		return A2(_elm_lang$core$Array$initialize, mapWidth * mapHeight, bachedChecks);
+	});
+var _user$project$Main$filterJusts = function (list) {
+	filterJusts:
+	while (true) {
+		var _p0 = list;
+		if (_p0.ctor === '[]') {
+			return _elm_lang$core$Native_List.fromArray(
+				[]);
+		} else {
+			var _p2 = _p0._1;
+			var _p1 = _p0._0;
+			if (_p1.ctor === 'Nothing') {
+				var _v2 = _p2;
+				list = _v2;
+				continue filterJusts;
+			} else {
+				return A2(
+					_elm_lang$core$List_ops['::'],
+					_p1._0,
+					_user$project$Main$filterJusts(_p2));
+			}
+		}
+	}
+};
+var _user$project$Main$getComponent = F2(
+	function (name, entity) {
+		var toReturn = A2(_elm_lang$core$Dict$get, name, entity.components);
+		return toReturn;
+	});
+var _user$project$Main$upsertComponent = F3(
+	function (name, component, entity) {
+		var components = entity.components;
+		return _elm_lang$core$Native_Utils.update(
+			entity,
+			{
+				components: A3(_elm_lang$core$Dict$insert, name, component, components)
+			});
+	});
+var _user$project$Main$removeComponent = F2(
+	function (name, _p3) {
+		var _p4 = _p3;
+		return _elm_lang$core$Native_Utils.update(
+			_p4,
+			{
+				components: A2(_elm_lang$core$Dict$remove, name, _p4.components)
+			});
+	});
+var _user$project$Main$sticky_threshold = 4.0e-4;
+var _user$project$Main$onCollisionEnter = F2(
+	function (dt, entity) {
+		var _p5 = A2(_user$project$Main$getComponent, 'collisionEnter', entity);
+		if ((_p5.ctor === 'Just') && (_p5._0.ctor === 'CollisionEnter')) {
+			return A2(_p5._0._0, dt, entity);
+		} else {
+			return entity;
+		}
+	});
+var _user$project$Main$cRight = 3;
+var _user$project$Main$cLeft = 2;
+var _user$project$Main$cBottom = 1;
+var _user$project$Main$cTop = 0;
+var _user$project$Main$toCollisionDir = F2(
+	function (a, b) {
+		var _p6 = {
+			ctor: '_Tuple2',
+			_0: A2(_user$project$Main$getComponent, 'position', a),
+			_1: A2(_user$project$Main$getComponent, 'boundingBox', a)
+		};
+		if (((((_p6.ctor === '_Tuple2') && (_p6._0.ctor === 'Just')) && (_p6._0._0.ctor === 'Position')) && (_p6._1.ctor === 'Just')) && (_p6._1._0.ctor === 'BoundingBox')) {
+			var _p11 = _p6._0._0._1;
+			var _p10 = _p6._0._0._0;
+			var _p7 = {
+				ctor: '_Tuple2',
+				_0: A2(_user$project$Main$getComponent, 'position', b),
+				_1: A2(_user$project$Main$getComponent, 'boundingBox', b)
+			};
+			if (((((_p7.ctor === '_Tuple2') && (_p7._0.ctor === 'Just')) && (_p7._0._0.ctor === 'Position')) && (_p7._1.ctor === 'Just')) && (_p7._1._0.ctor === 'BoundingBox')) {
+				var _p9 = _p7._0._0._1;
+				var _p8 = _p7._0._0._0;
+				var bMidY = _p9 + (_p7._1._0._1 / 2);
+				var bMidX = _p8 + (_p7._1._0._0 / 2);
+				var aMidY = _p11 + (_p6._1._0._1 / 2);
+				var dy = bMidY - aMidY;
+				var absDy = _elm_lang$core$Basics$abs(dy);
+				var aMidX = _p10 + (_p6._1._0._0 / 2);
+				var dx = bMidX - aMidX;
+				var absDx = _elm_lang$core$Basics$abs(dx);
+				return (_elm_lang$core$Native_Utils.cmp(absDx, absDy) > 0) ? ((_elm_lang$core$Native_Utils.cmp(_p8, _p10) > 0) ? _elm_lang$core$Maybe$Just(_user$project$Main$cRight) : _elm_lang$core$Maybe$Just(_user$project$Main$cLeft)) : ((_elm_lang$core$Native_Utils.cmp(_p9, _p11) > 0) ? _elm_lang$core$Maybe$Just(_user$project$Main$cBottom) : _elm_lang$core$Maybe$Just(_user$project$Main$cTop));
+			} else {
+				return _elm_lang$core$Maybe$Nothing;
+			}
+		} else {
+			return _elm_lang$core$Maybe$Nothing;
+		}
+	});
+var _user$project$Main$collisionDir = F2(
+	function (entity, entities) {
+		return _elm_lang$core$Set$fromList(
+			_user$project$Main$filterJusts(
+				A2(
+					_elm_lang$core$List$map,
+					_user$project$Main$toCollisionDir(entity),
+					entities)));
+	});
+var _user$project$Main$svgAttributes = function (_p12) {
+	var _p13 = _p12;
+	var _p15 = _p13._0;
+	var _p14 = _p13._1;
 	return _elm_lang$core$Native_List.fromArray(
 		[
 			_elm_lang$svg$Svg_Attributes$width(
-			_elm_lang$core$Basics$toString(_p3)),
+			_elm_lang$core$Basics$toString(_p15)),
 			_elm_lang$svg$Svg_Attributes$height(
-			_elm_lang$core$Basics$toString(_p2)),
+			_elm_lang$core$Basics$toString(_p14)),
 			_elm_lang$svg$Svg_Attributes$viewBox(
 			A2(
 				_elm_lang$core$Basics_ops['++'],
 				'0 0 ',
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					_elm_lang$core$Basics$toString(_p3),
+					_elm_lang$core$Basics$toString(_p15),
 					A2(
 						_elm_lang$core$Basics_ops['++'],
 						' ',
-						_elm_lang$core$Basics$toString(_p2))))),
+						_elm_lang$core$Basics$toString(_p14))))),
 			A2(
 			_elm_lang$virtual_dom$VirtualDom$property,
 			'xmlns:xlink',
@@ -27,124 +139,787 @@ var _user$project$Main$svgAttributes = function (_p0) {
 			_elm_lang$svg$Svg_Attributes$style('position: fixed;')
 		]);
 };
-var _user$project$Main$tileColor = function (tileType) {
-	var _p4 = tileType;
-	if (_p4 === 1) {
-		return 'rgba(255, 0, 0, 1)';
-	} else {
-		return 'rgba(255, 255, 255, 0)';
-	}
-};
-var _user$project$Main$renderTile = function (tile) {
-	var heightString = _elm_lang$core$Basics$toString(tile.h);
-	var widthString = _elm_lang$core$Basics$toString(tile.w);
-	var yString = _elm_lang$core$Basics$toString(tile.y);
-	var xString = _elm_lang$core$Basics$toString(tile.x);
+var _user$project$Main$renderEntity = F2(
+	function (scale, entity) {
+		var _p16 = {
+			ctor: '_Tuple3',
+			_0: A2(_user$project$Main$getComponent, 'position', entity),
+			_1: A2(_user$project$Main$getComponent, 'shape', entity),
+			_2: A2(_user$project$Main$getComponent, 'color', entity)
+		};
+		if (((((((_p16.ctor === '_Tuple3') && (_p16._0.ctor === 'Just')) && (_p16._0._0.ctor === 'Position')) && (_p16._1.ctor === 'Just')) && (_p16._1._0.ctor === 'Shape')) && (_p16._2.ctor === 'Just')) && (_p16._2._0.ctor === 'Color')) {
+			var _p22 = _p16._0._0._1;
+			var _p21 = _p16._0._0._0;
+			var _p20 = _p16._2._0._0;
+			var _p17 = _p16._1._0._0;
+			if (_p17.ctor === 'Square') {
+				var _p18 = _p17._0;
+				return _elm_lang$core$Maybe$Just(
+					A2(
+						_elm_lang$svg$Svg$rect,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$svg$Svg_Attributes$x(
+								_elm_lang$core$Basics$toString(_p21 * scale)),
+								_elm_lang$svg$Svg_Attributes$y(
+								_elm_lang$core$Basics$toString(_p22 * scale)),
+								_elm_lang$svg$Svg_Attributes$width(
+								_elm_lang$core$Basics$toString(1 + (_p18 * scale))),
+								_elm_lang$svg$Svg_Attributes$height(
+								_elm_lang$core$Basics$toString(1 + (_p18 * scale))),
+								_elm_lang$svg$Svg_Attributes$fill(_p20)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])));
+			} else {
+				var _p19 = _p17._0;
+				return _elm_lang$core$Maybe$Just(
+					A2(
+						_elm_lang$svg$Svg$circle,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$svg$Svg_Attributes$cx(
+								_elm_lang$core$Basics$toString((_p21 + _p19) * scale)),
+								_elm_lang$svg$Svg_Attributes$cy(
+								_elm_lang$core$Basics$toString((_p22 + _p19) * scale)),
+								_elm_lang$svg$Svg_Attributes$r(
+								_elm_lang$core$Basics$toString(1 + (_p19 * scale))),
+								_elm_lang$svg$Svg_Attributes$fill(_p20)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])));
+			}
+		} else {
+			return _elm_lang$core$Maybe$Nothing;
+		}
+	});
+var _user$project$Main$render = F2(
+	function (_p23, entities) {
+		var _p24 = _p23;
+		return A2(
+			_elm_lang$svg$Svg$svg,
+			_user$project$Main$svgAttributes(
+				{ctor: '_Tuple2', _0: _p24._0, _1: _p24._1}),
+			_user$project$Main$filterJusts(
+				A2(
+					_elm_lang$core$List$map,
+					_user$project$Main$renderEntity(_p24._2),
+					A2(
+						_elm_lang$core$List$sortBy,
+						function (_) {
+							return _.layer;
+						},
+						entities))));
+	});
+var _user$project$Main$view = function (_p25) {
+	var _p26 = _p25;
+	var _p27 = _p26.scene;
+	var debug = A2(_elm_lang$core$Debug$log, 'render', 1);
 	return A2(
-		_elm_lang$svg$Svg$rect,
+		_user$project$Main$render,
+		{ctor: '_Tuple3', _0: _p27.sceneWidth, _1: _p27.sceneHeight, _2: _p27.tileWidth},
+		_p26.entities);
+};
+var _user$project$Main$handleKeyChange = F3(
+	function (pressed, keycode, game) {
+		var input = game.input;
+		return pressed ? (_elm_lang$core$Native_Utils.eq(keycode, 87) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{y: -1})
+			}) : (_elm_lang$core$Native_Utils.eq(keycode, 83) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{y: 1})
+			}) : (_elm_lang$core$Native_Utils.eq(keycode, 65) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{x: -1})
+			}) : (_elm_lang$core$Native_Utils.eq(keycode, 68) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{x: 1})
+			}) : (_elm_lang$core$Native_Utils.eq(keycode, 32) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{action: pressed})
+			}) : game))))) : (_elm_lang$core$Native_Utils.eq(keycode, 87) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{y: 0})
+			}) : (_elm_lang$core$Native_Utils.eq(keycode, 83) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{y: 0})
+			}) : (_elm_lang$core$Native_Utils.eq(keycode, 65) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{x: 0})
+			}) : (_elm_lang$core$Native_Utils.eq(keycode, 68) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{x: 0})
+			}) : (_elm_lang$core$Native_Utils.eq(keycode, 32) ? _elm_lang$core$Native_Utils.update(
+			game,
+			{
+				input: _elm_lang$core$Native_Utils.update(
+					input,
+					{action: pressed})
+			}) : game)))));
+	});
+var _user$project$Main$Input = F3(
+	function (a, b, c) {
+		return {x: a, y: b, action: c};
+	});
+var _user$project$Main$Entity = F4(
+	function (a, b, c, d) {
+		return {components: a, tag: b, name: c, layer: d};
+	});
+var _user$project$Main$TileMap = F5(
+	function (a, b, c, d, e) {
+		return {tiles: a, tile: b, mapLength: c, mapHeight: d, layer: e};
+	});
+var _user$project$Main$Scene = F4(
+	function (a, b, c, d) {
+		return {sceneWidth: a, sceneHeight: b, tileWidth: c, tileMaps: d};
+	});
+var _user$project$Main$Game = F3(
+	function (a, b, c) {
+		return {entities: a, input: b, scene: c};
+	});
+var _user$project$Main$Circle = function (a) {
+	return {ctor: 'Circle', _0: a};
+};
+var _user$project$Main$Square = function (a) {
+	return {ctor: 'Square', _0: a};
+};
+var _user$project$Main$Displace = {ctor: 'Displace'};
+var _user$project$Main$Elastic = function (a) {
+	return {ctor: 'Elastic', _0: a};
+};
+var _user$project$Main$Static = {ctor: 'Static'};
+var _user$project$Main$checkCollision = F2(
+	function (a, b) {
+		var bComponents = {
+			ctor: '_Tuple2',
+			_0: A2(_user$project$Main$getComponent, 'position', b),
+			_1: A2(_user$project$Main$getComponent, 'boundingBox', b)
+		};
+		var aComponents = {
+			ctor: '_Tuple3',
+			_0: A2(_user$project$Main$getComponent, 'position', a),
+			_1: A2(_user$project$Main$getComponent, 'boundingBox', a),
+			_2: A2(_user$project$Main$getComponent, 'physics', a)
+		};
+		if (_elm_lang$core$Native_Utils.eq(a.name, b.name)) {
+			return false;
+		} else {
+			var _p28 = aComponents;
+			if (((((((_p28.ctor === '_Tuple3') && (_p28._0.ctor === 'Just')) && (_p28._0._0.ctor === 'Position')) && (_p28._1.ctor === 'Just')) && (_p28._1._0.ctor === 'BoundingBox')) && (_p28._2.ctor === 'Just')) && (_p28._2._0.ctor === 'Physics')) {
+				var _p33 = _p28._0._0._1;
+				var _p32 = _p28._0._0._0;
+				if (_elm_lang$core$Native_Utils.eq(_p28._2._0._0, _user$project$Main$Static)) {
+					return false;
+				} else {
+					var _p29 = bComponents;
+					if (((((_p29.ctor === '_Tuple2') && (_p29._0.ctor === 'Just')) && (_p29._0._0.ctor === 'Position')) && (_p29._1.ctor === 'Just')) && (_p29._1._0.ctor === 'BoundingBox')) {
+						var _p31 = _p29._0._0._1;
+						var _p30 = _p29._0._0._0;
+						return (!_elm_lang$core$Native_Utils.eq(a.layer, b.layer)) ? false : (((_elm_lang$core$Native_Utils.cmp(_p33 + _p28._1._0._1, _p31) < 0) || ((_elm_lang$core$Native_Utils.cmp(_p33, _p31 + _p29._1._0._1) > 0) || ((_elm_lang$core$Native_Utils.cmp(_p32 + _p28._1._0._0, _p30) < 0) || (_elm_lang$core$Native_Utils.cmp(_p32, _p30 + _p29._1._0._0) > 0)))) ? false : true);
+					} else {
+						return false;
+					}
+				}
+			} else {
+				return false;
+			}
+		}
+	});
+var _user$project$Main$Kinematic = function (a) {
+	return {ctor: 'Kinematic', _0: a};
+};
+var _user$project$Main$Dynamic = {ctor: 'Dynamic'};
+var _user$project$Main$CollisionEnter = function (a) {
+	return {ctor: 'CollisionEnter', _0: a};
+};
+var _user$project$Main$Collision = function (a) {
+	return {ctor: 'Collision', _0: a};
+};
+var _user$project$Main$checkCollisions = F2(
+	function (entities, entity) {
+		var _p34 = A2(_user$project$Main$getComponent, 'collision', entity);
+		if ((_p34.ctor === 'Just') && (_p34._0.ctor === 'Collision')) {
+			return A3(
+				_user$project$Main$upsertComponent,
+				'collision',
+				_user$project$Main$Collision(
+					A2(
+						_elm_lang$core$List$filter,
+						_user$project$Main$checkCollision(entity),
+						entities)),
+				entity);
+		} else {
+			return entity;
+		}
+	});
+var _user$project$Main$Physics = F2(
+	function (a, b) {
+		return {ctor: 'Physics', _0: a, _1: b};
+	});
+var _user$project$Main$Player = {ctor: 'Player'};
+var _user$project$Main$Controllable = function (a) {
+	return {ctor: 'Controllable', _0: a};
+};
+var _user$project$Main$applyInput = F2(
+	function (input, entity) {
+		var _p35 = A2(_user$project$Main$getComponent, 'controllable', entity);
+		if ((_p35.ctor === 'Just') && (_p35._0.ctor === 'Controllable')) {
+			return A3(
+				_user$project$Main$upsertComponent,
+				'controllable',
+				_user$project$Main$Controllable(input),
+				entity);
+		} else {
+			return entity;
+		}
+	});
+var _user$project$Main$applyInputGame = function (game) {
+	return _elm_lang$core$Native_Utils.update(
+		game,
+		{
+			entities: A2(
+				_elm_lang$core$List$map,
+				_user$project$Main$applyInput(game.input),
+				game.entities)
+		});
+};
+var _user$project$Main$BoundingBox = F2(
+	function (a, b) {
+		return {ctor: 'BoundingBox', _0: a, _1: b};
+	});
+var _user$project$Main$Shape = function (a) {
+	return {ctor: 'Shape', _0: a};
+};
+var _user$project$Main$Color = function (a) {
+	return {ctor: 'Color', _0: a};
+};
+var _user$project$Main$buildTestScene = function () {
+	var tileAt = function (tileType) {
+		return _elm_lang$core$Native_Utils.eq(tileType, 1) ? _elm_lang$core$Maybe$Just(
+			{
+				tag: 'wall',
+				name: 'blueWall',
+				layer: 0,
+				components: _elm_lang$core$Dict$fromList(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{
+							ctor: '_Tuple2',
+							_0: 'color',
+							_1: _user$project$Main$Color('rgba(0, 0, 255, 1)')
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'shape',
+							_1: _user$project$Main$Shape(
+								_user$project$Main$Square(1))
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'boundingBox',
+							_1: A2(_user$project$Main$BoundingBox, 1, 1)
+						},
+							{
+							ctor: '_Tuple2',
+							_0: 'physics',
+							_1: A2(_user$project$Main$Physics, _user$project$Main$Static, _user$project$Main$Displace)
+						}
+						]))
+			}) : _elm_lang$core$Maybe$Nothing;
+	};
+	var tileWidth = 32;
+	var mapHeight = 30;
+	var mapLength = 30;
+	var bordersAndPlatform = F2(
+		function (x, y) {
+			return ((_elm_lang$core$Native_Utils.cmp(x, 1) < 0) || ((_elm_lang$core$Native_Utils.cmp(x, mapLength - 2) > 0) || ((_elm_lang$core$Native_Utils.cmp(y, 1) < 0) || (_elm_lang$core$Native_Utils.cmp(y, mapHeight - 2) > -1)))) ? 1 : ((_elm_lang$core$Native_Utils.eq(y, (mapHeight / 2) | 0) && (_elm_lang$core$Native_Utils.cmp(y, (mapHeight / 2) | 0) > 0)) ? 1 : 0);
+		});
+	var tiles = A3(_user$project$Main$buildTileMapTiles, mapLength, mapHeight, bordersAndPlatform);
+	var tileMap = A5(_user$project$Main$TileMap, tiles, tileAt, mapLength, mapHeight, 0);
+	return A4(
+		_user$project$Main$Scene,
+		mapLength * tileWidth,
+		mapHeight * tileWidth,
+		tileWidth,
+		_elm_lang$core$Array$fromList(
+			_elm_lang$core$Native_List.fromArray(
+				[tileMap])));
+}();
+var _user$project$Main$Velocity = F2(
+	function (a, b) {
+		return {ctor: 'Velocity', _0: a, _1: b};
+	});
+var _user$project$Main$ninjaPlayer = F2(
+	function (dt, entity) {
+		var _p36 = {
+			ctor: '_Tuple3',
+			_0: A2(_user$project$Main$getComponent, 'controllable', entity),
+			_1: A2(_user$project$Main$getComponent, 'collision', entity),
+			_2: A2(_user$project$Main$getComponent, 'velocity', entity)
+		};
+		if (((((((_p36.ctor === '_Tuple3') && (_p36._0.ctor === 'Just')) && (_p36._0._0.ctor === 'Controllable')) && (_p36._1.ctor === 'Just')) && (_p36._1._0.ctor === 'Collision')) && (_p36._2.ctor === 'Just')) && (_p36._2._0.ctor === 'Velocity')) {
+			var _p39 = _p36._2._0._1;
+			var _p38 = _p36._2._0._0;
+			var _p37 = _p36._0._0._0;
+			var friction = 2;
+			var maxSlideSpeed = 20;
+			var maxSpeed = 50;
+			var acc = 10;
+			var jumpSpeed = 10;
+			var jump = _p37.action;
+			var iy = _elm_lang$core$Basics$toFloat(_p37.y);
+			var ix = _elm_lang$core$Basics$toFloat(_p37.x);
+			var handleWalking = function (entity) {
+				return ((_elm_lang$core$Native_Utils.cmp(_p38, maxSpeed) > 0) || (_elm_lang$core$Native_Utils.eq(ix, 0) && _elm_lang$core$Native_Utils.eq(iy, 0))) ? A3(
+					_user$project$Main$upsertComponent,
+					'velocity',
+					A2(_user$project$Main$Velocity, _p38 - ((friction * _p38) * dt), _p39),
+					entity) : A3(
+					_user$project$Main$upsertComponent,
+					'velocity',
+					A2(_user$project$Main$Velocity, _p38 + ((dt * acc) * ix), _p39),
+					entity);
+			};
+			var collisionSet = A2(_user$project$Main$collisionDir, entity, _p36._1._0._0);
+			var handleJumping = function (entity) {
+				return A2(_elm_lang$core$Set$member, _user$project$Main$cBottom, collisionSet) ? (jump ? A3(
+					_user$project$Main$upsertComponent,
+					'velocity',
+					A2(_user$project$Main$Velocity, _p38, 0 - jumpSpeed),
+					entity) : entity) : entity;
+			};
+			var handleWallJumping = function (entity) {
+				return jump ? (A2(_elm_lang$core$Set$member, _user$project$Main$cLeft, collisionSet) ? A3(
+					_user$project$Main$upsertComponent,
+					'velocity',
+					A2(_user$project$Main$Velocity, jumpSpeed / 2, 0 - jumpSpeed),
+					entity) : (A2(_elm_lang$core$Set$member, _user$project$Main$cRight, collisionSet) ? A3(
+					_user$project$Main$upsertComponent,
+					'velocity',
+					A2(_user$project$Main$Velocity, (0 - jumpSpeed) / 2, 0 - jumpSpeed),
+					entity) : entity)) : entity;
+			};
+			var handleWallSliding = function (entity) {
+				return (A2(_elm_lang$core$Set$member, _user$project$Main$cLeft, collisionSet) || A2(_elm_lang$core$Set$member, _user$project$Main$cRight, collisionSet)) ? A3(
+					_user$project$Main$upsertComponent,
+					'velocity',
+					A2(_user$project$Main$Velocity, _p38, 1),
+					entity) : entity;
+			};
+			return handleJumping(
+				handleWallJumping(
+					handleWallSliding(
+						handleWalking(entity))));
+		} else {
+			return entity;
+		}
+	});
+var _user$project$Main$applyGravity = F2(
+	function (dt, entity) {
+		var _p40 = {
+			ctor: '_Tuple2',
+			_0: A2(_user$project$Main$getComponent, 'velocity', entity),
+			_1: A2(_user$project$Main$getComponent, 'physics', entity)
+		};
+		if ((((((_p40.ctor === '_Tuple2') && (_p40._0.ctor === 'Just')) && (_p40._0._0.ctor === 'Velocity')) && (_p40._1.ctor === 'Just')) && (_p40._1._0.ctor === 'Physics')) && (_p40._1._0._0.ctor === 'Kinematic')) {
+			return A3(
+				_user$project$Main$upsertComponent,
+				'velocity',
+				A2(_user$project$Main$Velocity, _p40._0._0._0, _p40._0._0._1 + (dt * _p40._1._0._0._0)),
+				entity);
+		} else {
+			return entity;
+		}
+	});
+var _user$project$Main$Position = F2(
+	function (a, b) {
+		return {ctor: 'Position', _0: a, _1: b};
+	});
+var _user$project$Main$redBall = {
+	tag: 'player',
+	name: 'redBall',
+	layer: 0,
+	components: _elm_lang$core$Dict$fromList(
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$svg$Svg_Attributes$x(xString),
-				_elm_lang$svg$Svg_Attributes$y(yString),
-				_elm_lang$svg$Svg_Attributes$width(widthString),
-				_elm_lang$svg$Svg_Attributes$height(heightString),
-				_elm_lang$svg$Svg_Attributes$fill(
-				_user$project$Main$tileColor(tile.tileType))
-			]),
+				{
+				ctor: '_Tuple2',
+				_0: 'position',
+				_1: A2(_user$project$Main$Position, 10, 10)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'velocity',
+				_1: A2(_user$project$Main$Velocity, 0, 0)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'color',
+				_1: _user$project$Main$Color('rgba(255, 0, 0, 1)')
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'shape',
+				_1: _user$project$Main$Shape(
+					_user$project$Main$Square(1))
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'controllable',
+				_1: _user$project$Main$Controllable(
+					A3(_user$project$Main$Input, 0, 0, false))
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'collision',
+				_1: _user$project$Main$Collision(
+					_elm_lang$core$Native_List.fromArray(
+						[]))
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'collisionEnter',
+				_1: _user$project$Main$CollisionEnter(_user$project$Main$ninjaPlayer)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'boundingBox',
+				_1: A2(_user$project$Main$BoundingBox, 1, 1)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'physics',
+				_1: A2(
+					_user$project$Main$Physics,
+					_user$project$Main$Kinematic(10),
+					_user$project$Main$Elastic(0.1))
+			}
+			]))
+};
+var _user$project$Main$blueSquare = {
+	tag: 'wall',
+	name: 'blueSquare',
+	layer: 0,
+	components: _elm_lang$core$Dict$fromList(
 		_elm_lang$core$Native_List.fromArray(
-			[]));
+			[
+				{
+				ctor: '_Tuple2',
+				_0: 'position',
+				_1: A2(_user$project$Main$Position, 4, 2)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'velocity',
+				_1: A2(_user$project$Main$Velocity, 0, 0)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'color',
+				_1: _user$project$Main$Color('rgba(0, 0, 255, 1)')
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'collision',
+				_1: _user$project$Main$Collision(
+					_elm_lang$core$Native_List.fromArray(
+						[]))
+			},
+				{ctor: '_Tuple2', _0: 'player', _1: _user$project$Main$Player},
+				{
+				ctor: '_Tuple2',
+				_0: 'shape',
+				_1: _user$project$Main$Shape(
+					_user$project$Main$Square(1))
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'boundingBox',
+				_1: A2(_user$project$Main$BoundingBox, 1, 1)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'physics',
+				_1: A2(
+					_user$project$Main$Physics,
+					_user$project$Main$Kinematic(10),
+					_user$project$Main$Elastic(0.1))
+			}
+			]))
 };
-var _user$project$Main$renderMap = function (scene) {
-	var t = 1;
-	return _elm_lang$core$Array$toList(
-		A2(
-			_elm_lang$core$Array$map,
-			_user$project$Main$renderTile,
-			_user$project$Scenes$tiles(scene)));
-};
-var _user$project$Main$renderScene = function (scene) {
-	return _user$project$Main$renderMap(scene);
-};
-var _user$project$Main$renderPlayer = F2(
-	function (scene, player) {
-		var msg = A2(
-			_elm_lang$core$Debug$log,
-			_elm_lang$core$Basics$toString(player),
-			1);
-		var heightString = _elm_lang$core$Basics$toString(scene.tileHeight);
-		var widthString = _elm_lang$core$Basics$toString((scene.tileWidth / 2) | 0);
-		var yString = _elm_lang$core$Basics$toString(player.position.y);
-		var xString = _elm_lang$core$Basics$toString(player.position.x);
-		return A2(
-			_elm_lang$svg$Svg$rect,
-			_elm_lang$core$Native_List.fromArray(
-				[
-					_elm_lang$svg$Svg_Attributes$x(xString),
-					_elm_lang$svg$Svg_Attributes$y(yString),
-					_elm_lang$svg$Svg_Attributes$width(widthString),
-					_elm_lang$svg$Svg_Attributes$height(heightString),
-					_elm_lang$svg$Svg_Attributes$fill('rgba(0,0,255,1)')
-				]),
-			_elm_lang$core$Native_List.fromArray(
-				[]));
+var _user$project$Main$tileAt = F3(
+	function (tileMap, x, y) {
+		var index = (y * tileMap.mapLength) + x;
+		var _p41 = A2(_elm_lang$core$Array$get, index, tileMap.tiles);
+		if (_p41.ctor === 'Just') {
+			var _p42 = tileMap.tile(_p41._0);
+			if (_p42.ctor === 'Just') {
+				return _elm_lang$core$Maybe$Just(
+					A3(
+						_user$project$Main$upsertComponent,
+						'position',
+						A2(
+							_user$project$Main$Position,
+							_elm_lang$core$Basics$toFloat(x),
+							_elm_lang$core$Basics$toFloat(y)),
+						_p42._0));
+			} else {
+				return _elm_lang$core$Maybe$Nothing;
+			}
+		} else {
+			return _elm_lang$core$Maybe$Nothing;
+		}
 	});
-var _user$project$Main$view = function (game) {
+var _user$project$Main$getTile = F3(
+	function (tilemap, index, _p43) {
+		var y = (index / tilemap.mapHeight) | 0;
+		var x = A2(_elm_lang$core$Basics_ops['%'], index, tilemap.mapLength);
+		return A3(_user$project$Main$tileAt, tilemap, x, y);
+	});
+var _user$project$Main$getTiles = function (tileMap) {
+	return _user$project$Main$filterJusts(
+		_elm_lang$core$Array$toList(
+			A2(
+				_elm_lang$core$Array$indexedMap,
+				_user$project$Main$getTile(tileMap),
+				tileMap.tiles)));
+};
+var _user$project$Main$loadEntities = function (scene) {
 	return A2(
-		_elm_lang$svg$Svg$svg,
-		_user$project$Main$svgAttributes(
-			_user$project$Scenes$windowSize(game.scene)),
-		A2(
-			_elm_lang$core$Basics_ops['++'],
-			_user$project$Main$renderScene(game.scene),
-			_elm_lang$core$Native_List.fromArray(
-				[
-					A2(_user$project$Main$renderPlayer, game.scene, game.player)
-				])));
-};
-var _user$project$Main$update = F2(
-	function (action, game) {
-		return {ctor: '_Tuple2', _0: game, _1: _elm_lang$core$Platform_Cmd$none};
-	});
-var _user$project$Main$Vector = F2(
-	function (a, b) {
-		return {x: a, y: b};
-	});
-var _user$project$Main$Game = F2(
-	function (a, b) {
-		return {scene: a, player: b};
-	});
-var _user$project$Main$GameObject = function (a) {
-	return {position: a};
+		_elm_lang$core$List$concatMap,
+		_user$project$Main$getTiles,
+		_elm_lang$core$Array$toList(scene.tileMaps));
 };
 var _user$project$Main$init = function () {
-	var initialScene = A2(
-		_elm_lang$core$Maybe$withDefault,
-		_user$project$Scenes$genTestScene,
-		_user$project$Scenes$getScene('test'));
+	var scene = _user$project$Main$buildTestScene;
 	return {
 		ctor: '_Tuple2',
 		_0: {
-			scene: initialScene,
-			player: _user$project$Main$GameObject(
-				_user$project$Scenes$getPlayerSpawnPos(initialScene))
+			entities: A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Native_List.fromArray(
+					[_user$project$Main$redBall, _user$project$Main$blueSquare]),
+				_user$project$Main$loadEntities(scene)),
+			input: A3(_user$project$Main$Input, 0, 0, false),
+			scene: scene
 		},
 		_1: _elm_lang$core$Platform_Cmd$none
 	};
 }();
-var _user$project$Main$NoOp = {ctor: 'NoOp'};
-var _user$project$Main$TimeSecond = function (a) {
-	return {ctor: 'TimeSecond', _0: a};
+var _user$project$Main$moveEntity = F2(
+	function (dt, entity) {
+		var _p44 = {
+			ctor: '_Tuple2',
+			_0: A2(_user$project$Main$getComponent, 'position', entity),
+			_1: A2(_user$project$Main$getComponent, 'velocity', entity)
+		};
+		if (((((_p44.ctor === '_Tuple2') && (_p44._0.ctor === 'Just')) && (_p44._0._0.ctor === 'Position')) && (_p44._1.ctor === 'Just')) && (_p44._1._0.ctor === 'Velocity')) {
+			return A3(
+				_user$project$Main$upsertComponent,
+				'position',
+				A2(_user$project$Main$Position, _p44._0._0._0 + (dt * _p44._1._0._0), _p44._0._0._1 + (dt * _p44._1._0._1)),
+				entity);
+		} else {
+			return entity;
+		}
+	});
+var _user$project$Main$resolveCollision = F2(
+	function (b, a) {
+		if (_elm_lang$core$Native_Utils.eq(a.name, b.name)) {
+			return a;
+		} else {
+			var _p45 = {
+				ctor: '_Tuple4',
+				_0: A2(_user$project$Main$getComponent, 'position', a),
+				_1: A2(_user$project$Main$getComponent, 'velocity', a),
+				_2: A2(_user$project$Main$getComponent, 'boundingBox', a),
+				_3: A2(_user$project$Main$getComponent, 'physics', a)
+			};
+			if (((((((((_p45.ctor === '_Tuple4') && (_p45._0.ctor === 'Just')) && (_p45._0._0.ctor === 'Position')) && (_p45._1.ctor === 'Just')) && (_p45._1._0.ctor === 'Velocity')) && (_p45._2.ctor === 'Just')) && (_p45._2._0.ctor === 'BoundingBox')) && (_p45._3.ctor === 'Just')) && (_p45._3._0.ctor === 'Physics')) {
+				var _p63 = _p45._3._0._1;
+				var _p62 = _p45._0._0._1;
+				var _p61 = _p45._0._0._0;
+				var _p60 = _p45._2._0._0;
+				var _p59 = _p45._1._0._1;
+				var _p58 = _p45._1._0._0;
+				var _p57 = _p45._2._0._1;
+				if (_elm_lang$core$Native_Utils.eq(_p45._3._0._0, _user$project$Main$Static)) {
+					return a;
+				} else {
+					var _p46 = {
+						ctor: '_Tuple2',
+						_0: A2(_user$project$Main$getComponent, 'position', b),
+						_1: A2(_user$project$Main$getComponent, 'boundingBox', b)
+					};
+					if (((((_p46.ctor === '_Tuple2') && (_p46._0.ctor === 'Just')) && (_p46._0._0.ctor === 'Position')) && (_p46._1.ctor === 'Just')) && (_p46._1._0.ctor === 'BoundingBox')) {
+						var _p56 = _p46._0._0._1;
+						var _p55 = _p46._0._0._0;
+						var _p54 = _p46._1._0._0;
+						var _p53 = _p46._1._0._1;
+						var newVy = function () {
+							if (_elm_lang$core$Native_Utils.cmp(
+								_elm_lang$core$Basics$abs(_p59),
+								_user$project$Main$sticky_threshold) < 0) {
+								return 0;
+							} else {
+								var _p47 = _p63;
+								if (_p47.ctor === 'Displace') {
+									return 0;
+								} else {
+									var _p49 = _p47._0;
+									var _p48 = A2(_user$project$Main$getComponent, 'velocity', b);
+									if ((_p48.ctor === 'Just') && (_p48._0.ctor === 'Velocity')) {
+										return ((0 - _p59) * _p49) + (_p48._0._1 * _p49);
+									} else {
+										return (0 - _p59) * _p49;
+									}
+								}
+							}
+						}();
+						var newVx = function () {
+							if (_elm_lang$core$Native_Utils.cmp(
+								_elm_lang$core$Basics$abs(_p58),
+								_user$project$Main$sticky_threshold) < 0) {
+								return 0;
+							} else {
+								var _p50 = _p63;
+								if (_p50.ctor === 'Displace') {
+									return 0;
+								} else {
+									var _p52 = _p50._0;
+									var _p51 = A2(_user$project$Main$getComponent, 'velocity', b);
+									if ((_p51.ctor === 'Just') && (_p51._0.ctor === 'Velocity')) {
+										return ((0 - _p58) * _p52) + (_p51._0._0 * _p52);
+									} else {
+										return (0 - _p58) * _p52;
+									}
+								}
+							}
+						}();
+						var coinFlip = _elm_lang$core$Native_Utils.cmp(_p61, _p55) > 0;
+						var bMidY = _p56 + (_p53 / 2);
+						var bMidX = _p55 + (_p54 / 2);
+						var aMidY = _p62 + (_p57 / 2);
+						var dy = (bMidY - aMidY) / (_p53 / 2);
+						var absDy = _elm_lang$core$Basics$abs(dy);
+						var newY = (_elm_lang$core$Native_Utils.cmp(dy, 0) < 0) ? ((_p56 + _p53) + 1.0e-2) : ((_p56 - _p57) - 1.0e-2);
+						var aMidX = _p61 + (_p60 / 2);
+						var dx = (bMidX - aMidX) / (_p54 / 2);
+						var absDx = _elm_lang$core$Basics$abs(dx);
+						var newX = (_elm_lang$core$Native_Utils.cmp(dx, 0) < 0) ? ((_p55 + _p54) + 1.0e-2) : ((_p55 - _p60) - 1.0e-2);
+						return (_elm_lang$core$Native_Utils.cmp(absDx, absDy) > 0) ? A3(
+							_user$project$Main$upsertComponent,
+							'velocity',
+							A2(_user$project$Main$Velocity, newVx, _p59),
+							A3(
+								_user$project$Main$upsertComponent,
+								'position',
+								A2(_user$project$Main$Position, newX, _p62),
+								a)) : A3(
+							_user$project$Main$upsertComponent,
+							'velocity',
+							A2(_user$project$Main$Velocity, _p58, newVy),
+							A3(
+								_user$project$Main$upsertComponent,
+								'position',
+								A2(_user$project$Main$Position, _p61, newY),
+								a));
+					} else {
+						return a;
+					}
+				}
+			} else {
+				return a;
+			}
+		}
+	});
+var _user$project$Main$resolveCollisions = function (entity) {
+	var _p64 = A2(_user$project$Main$getComponent, 'collision', entity);
+	if ((_p64.ctor === 'Just') && (_p64._0.ctor === 'Collision')) {
+		return A3(_elm_lang$core$List$foldr, _user$project$Main$resolveCollision, entity, _p64._0._0);
+	} else {
+		return entity;
+	}
 };
-var _user$project$Main$StartGame = {ctor: 'StartGame'};
+var _user$project$Main$updateEntity = F3(
+	function (dt, game, entity) {
+		return A2(
+			_user$project$Main$onCollisionEnter,
+			dt,
+			_user$project$Main$resolveCollisions(
+				A2(
+					_user$project$Main$checkCollisions,
+					game.entities,
+					A2(
+						_user$project$Main$moveEntity,
+						dt,
+						A2(_user$project$Main$applyGravity, dt, entity)))));
+	});
+var _user$project$Main$update = F2(
+	function (msg, _p65) {
+		var _p66 = _p65;
+		var _p68 = _p66;
+		var _p67 = msg;
+		if (_p67.ctor === 'Tick') {
+			var debug = A2(_elm_lang$core$Debug$log, 'update', 1);
+			return {
+				ctor: '_Tuple2',
+				_0: _elm_lang$core$Native_Utils.update(
+					_p68,
+					{
+						entities: A2(
+							_elm_lang$core$List$map,
+							A2(
+								_user$project$Main$updateEntity,
+								_elm_lang$core$Time$inSeconds(_p67._0),
+								_p68),
+							_p68.entities)
+					}),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
+		} else {
+			return {
+				ctor: '_Tuple2',
+				_0: _user$project$Main$applyInputGame(
+					A3(_user$project$Main$handleKeyChange, _p67._0, _p67._1, _p68)),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
+		}
+	});
 var _user$project$Main$KeyChange = F2(
 	function (a, b) {
 		return {ctor: 'KeyChange', _0: a, _1: b};
 	});
 var _user$project$Main$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
-};
-var _user$project$Main$ResizeWindow = function (a) {
-	return {ctor: 'ResizeWindow', _0: a};
 };
 var _user$project$Main$subscriptions = function (game) {
 	var animation = _elm_lang$core$Native_List.fromArray(
@@ -158,31 +933,10 @@ var _user$project$Main$subscriptions = function (game) {
 			_elm_lang$keyboard$Keyboard$ups(
 			_user$project$Main$KeyChange(false))
 		]);
-	var window = _elm_lang$window$Window$resizes(
-		function (_p5) {
-			var _p6 = _p5;
-			return _user$project$Main$ResizeWindow(
-				{ctor: '_Tuple2', _0: _p6.width, _1: _p6.height});
-		});
 	return _elm_lang$core$Platform_Sub$batch(
-		A2(
-			_elm_lang$core$Basics_ops['++'],
-			_elm_lang$core$Native_List.fromArray(
-				[window]),
-			A2(_elm_lang$core$Basics_ops['++'], keys, animation)));
+		A2(_elm_lang$core$Basics_ops['++'], keys, animation));
 };
 var _user$project$Main$main = {
 	main: _elm_lang$html$Html_App$program(
 		{init: _user$project$Main$init, update: _user$project$Main$update, view: _user$project$Main$view, subscriptions: _user$project$Main$subscriptions})
 };
-var _user$project$Main$initialWindowSizeCommand = A3(
-	_elm_lang$core$Task$perform,
-	function (_p7) {
-		return _user$project$Main$NoOp;
-	},
-	function (_p8) {
-		var _p9 = _p8;
-		return _user$project$Main$ResizeWindow(
-			{ctor: '_Tuple2', _0: _p9.width, _1: _p9.height});
-	},
-	_elm_lang$window$Window$size);
